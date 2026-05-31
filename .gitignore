@@ -4,7 +4,7 @@
 
 .tmp
 .idea
-.env
+//.env
 
 # multer initial storage
 /uploads
