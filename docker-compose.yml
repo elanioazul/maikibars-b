@@ -1,3 +1,4 @@
+services:
 # maikibars-b-postgres:
 #   image: kartoza/postgis:${POSTGIS_VERSION_TAG}
 #   container_name: maikibars-postgres
@@ -14,7 +15,7 @@
 #     - pg-vol:/var/lib/postgresql/data
 #     - ./postgres-config/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
 #   networks:
-#     - gameandgis-network
+#     - maikibars-network
 #   healthcheck:
 #     test: "PGPASSWORD=${DATABASE_PASSWORD} pg_isready -h 127.0.0.1 -U ${DATABASE_USER}} -d ${DATABASE_NAME}"
 #     interval: 1m30s
@@ -29,7 +30,7 @@
 #     DATABASE_NAME: ${DATABASE_NAME}
 #     DATABASE_USER: ${DATABASE_USER}
 #     DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-#     DATABASE_HOST: gameandgis-b-postgres
+#     DATABASE_HOST: maikibars-b-postgres
 #     DATABASE_PORT: ${DATABASE_PORT}
 #   build:
 #     target: dev
@@ -45,27 +46,32 @@
 #   command: bash -c "npm run build-and-copy && npm run start:debug"
 
 #   depends_on:
-#     - gameandgis-b-postgres
-#     - gameandgis-b-redis
-#     - gameandgis-b-geoserver
+#     - maikibars-b-postgres
 #     - gameandgis-b-martin
 #   links:
-#     - gameandgis-b-postgres
-#     - gameandgis-b-redis
+#     - maikibars-b-postgres
 #   networks:
-#     - gameandgis-network
-maikibars-b-martin:
-  image: ghcr.io/maplibre/martin:1.9.0
-  container_name: maikibars-martin
-  restart: on-failure
-  ports:
-    - "3002:3000"
-  volumes:
-    - /c/users/hugoh/documents/projects_personal/maikibars_osm:/mbtiles/madrid:ro
-    - .:/config
-  command: --config /config/martin-config.yaml
-  networks:
-    - gameandgis-network
-  depends_on:
-    gameandgis-b-postgres:
-      condition: service_healthy
+#     - maikibars-network
+  maikibars-b-martin:
+    image: ghcr.io/maplibre/martin:1.9.0
+    container_name: maikibars-martin
+    restart: on-failure
+    ports:
+      - "3002:3000"
+    volumes:
+      - /c/users/hugoh/documents/projects_personal/maikibars_osm:/mbtiles/madrid:ro
+      - .:/config
+    command: --config /config/martin-config.yaml --webui enable-for-all
+    networks:
+      - maikibars-network
+    # depends_on:
+    #   maikibars-b-postgres:
+    #     condition: service_healthy
+volumes:
+  #node_modules: null
+  pg-vol:
+    driver: local
+networks:
+  maikibars-network:
+    name: maikibars-global-net
+    driver: bridge

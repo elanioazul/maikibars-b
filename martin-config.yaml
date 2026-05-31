@@ -1,3 +1,4 @@
+webui: "enable-for-all"
 postgres:
 
 pmtiles:
