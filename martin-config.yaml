@@ -1,0 +1,8 @@
+postgres:
+
+pmtiles:
+
+mbtiles:
+  - /mbtiles/madrid/planetiler-madrid-just-city-osm.mbtiles
+sprites:
+  sources:

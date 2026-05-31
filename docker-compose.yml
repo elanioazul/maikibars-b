@@ -1,0 +1,71 @@
+# maikibars-b-postgres:
+#   image: kartoza/postgis:${POSTGIS_VERSION_TAG}
+#   container_name: maikibars-postgres
+#   restart: always
+#   env_file: .env
+#   environment:
+#     POSTGRES_DB: ${DATABASE_NAME}
+#     POSTGRES_USER: ${DATABASE_USER}
+#     POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+#     ALLOW_IP_RANGE: ${ALLOW_IP_RANGE}
+#   ports:
+#     - 5435:${DATABASE_PORT}
+#   volumes:
+#     - pg-vol:/var/lib/postgresql/data
+#     - ./postgres-config/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+#   networks:
+#     - gameandgis-network
+#   healthcheck:
+#     test: "PGPASSWORD=${DATABASE_PASSWORD} pg_isready -h 127.0.0.1 -U ${DATABASE_USER}} -d ${DATABASE_NAME}"
+#     interval: 1m30s
+#     timeout: 10s
+#     retries: 3
+#     start_period: 1m
+# maikibars-b-nest:
+#   container_name: maikibars-nest
+#   restart: unless-stopped
+#   env_file: .env
+#   environment:
+#     DATABASE_NAME: ${DATABASE_NAME}
+#     DATABASE_USER: ${DATABASE_USER}
+#     DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+#     DATABASE_HOST: gameandgis-b-postgres
+#     DATABASE_PORT: ${DATABASE_PORT}
+#   build:
+#     target: dev
+#     context: .
+#     args:
+#       - PORT=${NEST_PORT}
+#   #entrypoint: ["npm", "run", "start:dev"]
+#   ports:
+#     - 5002:${NEST_PORT}
+#     - 9229:9229 #debuggin port
+#   volumes:
+
+#   command: bash -c "npm run build-and-copy && npm run start:debug"
+
+#   depends_on:
+#     - gameandgis-b-postgres
+#     - gameandgis-b-redis
+#     - gameandgis-b-geoserver
+#     - gameandgis-b-martin
+#   links:
+#     - gameandgis-b-postgres
+#     - gameandgis-b-redis
+#   networks:
+#     - gameandgis-network
+maikibars-b-martin:
+  image: ghcr.io/maplibre/martin:1.9.0
+  container_name: maikibars-martin
+  restart: on-failure
+  ports:
+    - "3002:3000"
+  volumes:
+    - /c/users/hugoh/documents/projects_personal/maikibars_osm:/mbtiles/madrid:ro
+    - .:/config
+  command: --config /config/martin-config.yaml
+  networks:
+    - gameandgis-network
+  depends_on:
+    gameandgis-b-postgres:
+      condition: service_healthy
